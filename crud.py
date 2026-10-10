@@ -68,3 +68,27 @@ def get_match_by_id(matches, match_id):
         if m["match_id"] == match_id:
             return m
     return None
+
+def get_player_stats(matches, player_id):
+    """Calculate stats for a specific player"""
+    player_matches = [m for m in matches if m["player_id"] == player_id]
+    if not player_matches:
+        return None
+
+    total_kills = sum(m["kills"] for m in player_matches)
+    total_deaths = sum(m["deaths"] for m in player_matches)
+    total_rounds = sum(m["total_rounds"] for m in player_matches)
+    total_damage = sum(m["damage"] for m in player_matches)
+    wins = sum(1 for m in player_matches if m["result"].lower() == "win")
+    total_matches = len(player_matches)
+
+    return {
+        "player_id": player_id,
+        "matches_count": total_matches,
+        "wins": wins,
+        "losses": total_matches - wins,
+        "win_rate": (wins / total_matches) * 100,
+        "career_kd": total_kills / total_deaths if total_deaths > 0 else float(total_kills),
+        "career_adr": total_damage / total_rounds if total_rounds > 0 else 0.0,
+    }
+
