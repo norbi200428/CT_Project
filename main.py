@@ -178,30 +178,97 @@ def handle_delete(matches):
 
 # menu allowing users to search matches by any field, use get_matches from crud
 # obv maybe dont allow searching by - match_id, total_rounds, headshots, damage or other fields like that
+# TODO: add composite key searching? while loop in menu, add key-value pairs to search key dict
 def handle_search(matches):
-    pass
+    print("Search matches by field:\n")
+    print("1. Player ID\n")
+    print("2. Map Name\n")
+    print("3. Agent/Character\n")
+    print("4. Result (Win/Lose)\n")
+    print("5. Exit Search Menu\n")
+    
+    choice = input("Select an option (1-5): ").strip()
+    
+    if choice == "1":
+        field = "player_id"
+        value = input("Enter Player ID: ").strip()
+        
+    elif choice == "2":
+        field = "map_name"
+        value = input("Enter Map Name: ").strip().capitalize()
+    
+    elif choice == "3":
+        field = "character"
+        value = input("Enter Agent/Character: ").strip().capitalize()
+        
+    elif choice == "4":
+        field = "result"
+        value = input("Enter Result (Win/Lose): ").strip().capitalize()
+        
+    elif choice == "5":
+        return
+    
+    search_keys = {
+            field: int(value) if value.isdigit() else value
+        }
+    matches_found = crud.get_matches(matches, **search_keys)
+    print(f"\nFound {len(matches_found)} matches for {field} = {value}:")
+    for m in matches_found:
+        print(f"Match ID: {m['match_id']}, Player ID: {m['player_id']}, Map: {m['map_name']}, Agent: {m['character']}, Result: {m['result']}")
+        
 
 # menu allowing users to sort matches by any field, use sort_matches from crud
+#tested
 def handle_sort(matches):
-    pass
+    print("Sort matches by field:\n")
+    print("1. Player ID\n")
+    print("2. Map Name\n")
+    print("3. Rounds Won\n")
+    print("4. Rounds Lost\n")
+    print("5. Exit Sort Menu\n")
+    
+    choice = input("Select an option (1-5): ").strip()
+    descflag = input("Sort in descending order? (y/n): ").strip().lower()
+    
+    if choice == "1":
+        field = "player_id"
+        
+    elif choice == "2":
+        field = "map_name"
+    
+    elif choice == "3":
+        field = "rounds_won"
+    
+    elif choice == "4":
+        field = "rounds_lost"
+        
+    elif choice == "5":
+        return
+    
+    if descflag == "y":
+        descflag = True
+    else:
+        descflag = False
+        
+    sorted_matches = crud.sort_matches(matches, field, descflag)
+    print(f"\nMatches sorted by {field}:")
+    for m in sorted_matches:
+        print(f"Match ID: {m['match_id']}, Player ID: {m['player_id']}, Map: {m['map_name']}, Agent: {m['character']}, Rounds Won: {m['rounds_won']}, Rounds Lost: {m['rounds_lost']} Result: {m['result']}")
 
 
-def main():
-    matches = crud.load_matches()
-    print(f"Loaded {len(matches)} match records from the database.")
 
+def handle_crud_menu(matches):
     while True:
         print("\n" + "=" * 32)
-        print("   ESPORTS TRACKER CLI  ")
+        print("   CRUD OPERATIONS MENU  ")
         print("=" * 32)
         print("1. [Read]   View All Matches")
         print("2. [Read]   Player All Career Stats")
         print("3. [Create] Log New Match")
         print("4. [Update] Edit a Match Record")
         print("5. [Delete] Remove a Match")
-        print("6. [Exit]   Exit Program")
-        print("=" * 32)
-
+        print("6. [Exit]   Return to Main Menu")
+        
         choice = input("Select an option (1-6): ").strip()
 
         if choice == "1":
@@ -215,10 +282,52 @@ def main():
         elif choice == "5":
             handle_delete(matches)
         elif choice == "6":
-            print("\nExiting program. All data saved.")
             break
         else:
             print("Invalid option. Enter a number 1-6.")
+            
+def handle_search_sort_menu(matches):
+    while True:
+        print("\n" + "=" * 32)
+        print("   SEARCH/SORT MENU  ")
+        print("=" * 32)
+        print("1. [Search] Search Matches")
+        print("2. [Sort]   Sort Matches")
+        print("3. [Exit]   Return to Main Menu")
+        
+        choice = input("Select an option (1-3): ").strip()
+
+        if choice == "1":
+            handle_search(matches)
+        elif choice == "2":
+            handle_sort(matches)
+        elif choice == "3":
+            break
+        else:
+            print("Invalid option. Enter a number 1-3.")
+
+def main():
+    matches = crud.load_matches()
+    print(f"Loaded {len(matches)} match records from the database.")
+
+    while True:
+        print("\n" + "=" * 32)
+        print("   ESPORTS TRACKER CLI  ")
+        print("=" * 32)
+        print("1. [Assignment 1] CRUD Operations")
+        print("2. [Assignment 2] Search/Sort")
+        print("3. [Exit] Quit the Application")
+        print("=" * 32)
+        choice = input("Select an option (1-2): ").strip()
+        if choice == "1":
+            handle_crud_menu(matches)
+        elif choice == "2":
+            handle_search_sort_menu(matches)
+        elif choice == "3":
+            print("Exiting the application")
+            break
+        else:
+            print("Invalid option. Enter a number 1-3.")
 
 if __name__ == "__main__":
     main()

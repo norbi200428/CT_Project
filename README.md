@@ -178,9 +178,6 @@ python main.py
 
 A likely next step for this project would be to expand the CLI into a more complete tracker with:
 
-- advanced filters and search
-- update/delete completion
-- sorting by map, agent, or player
 - export to CSV or JSON
 - a simple dashboard or charting view
 - database-backed storage instead of a flat CSV file
