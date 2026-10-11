@@ -6,6 +6,8 @@ FIELD_NAMES = [
     "match_id", "player_id", "map_name", "character", "result", "rounds_won", "rounds_lost", "total_rounds", "kills", "deaths", "assists", "headshots", "damage"
 ]
 
+#TODO: split into playerservice, matchservice
+
 def load_matches(filepath=CSV_FILE):
     """Read matches.csv into a list of dictionaries"""
 
@@ -57,40 +59,6 @@ def calculate_metrics(match):
 
     return kd, kda, adr, headshot_rate
 
-def get_all_matches(matches):
-    """Return all stored matches."""
-    return matches
-
-# prob will need this for update tasks - if not just delete
-def get_match_by_id(matches, match_id):
-    """Return a single match by its id or None"""
-    for m in matches:
-        if m["match_id"] == match_id:
-            return m
-    return None
-
-def get_player_stats(matches, player_id):
-    """Calculate stats for a specific player"""
-    player_matches = [m for m in matches if m["player_id"] == player_id]
-    if not player_matches:
-        return None
-
-    total_kills = sum(m["kills"] for m in player_matches)
-    total_deaths = sum(m["deaths"] for m in player_matches)
-    total_rounds = sum(m["total_rounds"] for m in player_matches)
-    total_damage = sum(m["damage"] for m in player_matches)
-    wins = sum(1 for m in player_matches if m["result"].lower() == "win")
-    total_matches = len(player_matches)
-
-    return {
-        "player_id": player_id,
-        "matches_count": total_matches,
-        "wins": wins,
-        "losses": total_matches - wins,
-        "win_rate": (wins / total_matches) * 100,
-        "career_kd": total_kills / total_deaths if total_deaths > 0 else float(total_kills),
-        "career_adr": total_damage / total_rounds if total_rounds > 0 else 0.0,
-    }
 
 def add_match(matches, player_id, map_name, character, result, rounds_won, rounds_lost, kills, deaths, assists, headshots, damage):
     """Create a new match record, append it, and persist to file."""
@@ -144,3 +112,60 @@ def update_match(matches, match_id, **kwargs):
 
     save_matches(matches)
     return True
+
+# assignment 2: search/sort
+
+
+#search utils
+
+def get_player_stats(matches, player_id):
+    """Calculate stats for a specific player"""
+    player_matches = [m for m in matches if m["player_id"] == player_id]
+    if not player_matches:
+        return None
+
+    total_kills = sum(m["kills"] for m in player_matches)
+    total_deaths = sum(m["deaths"] for m in player_matches)
+    total_rounds = sum(m["total_rounds"] for m in player_matches)
+    total_damage = sum(m["damage"] for m in player_matches)
+    wins = sum(1 for m in player_matches if m["result"].lower() == "win")
+    total_matches = len(player_matches)
+
+    return {
+        "player_id": player_id,
+        "matches_count": total_matches,
+        "wins": wins,
+        "losses": total_matches - wins,
+        "win_rate": (wins / total_matches) * 100,
+        "career_kd": total_kills / total_deaths if total_deaths > 0 else float(total_kills),
+        "career_adr": total_damage / total_rounds if total_rounds > 0 else 0.0,
+    }
+
+def get_all_matches(matches):
+    """Return all stored matches."""
+    return matches
+
+# prob will need this for update tasks - if not just delete
+def get_match_by_id(matches, match_id):
+    """Return a single match by its id or None"""
+    for m in matches:
+        if m["match_id"] == match_id:
+            return m
+    return None
+
+# not used rn, might be useful for search and also to replace the other getters
+def get_matches(matches, **kwargs):
+    """Return matches filtered by given criteria."""
+    filtered_matches = matches
+    for key, value in kwargs.items():
+        if key in FIELD_NAMES:
+            filtered_matches = [m for m in filtered_matches if m[key] == value]
+    return filtered_matches
+
+#sort utils
+
+def sort_matches(matches, sort_key, reverse=False):
+    """Sort matches based on a given key."""
+    if sort_key not in FIELD_NAMES:
+        raise ValueError(f"Invalid sort key: {sort_key}. Must be one of {FIELD_NAMES}.")
+    return sorted(matches, key=lambda x: x[sort_key], reverse=reverse)

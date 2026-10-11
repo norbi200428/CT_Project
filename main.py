@@ -4,6 +4,7 @@ VALID_MAPS = ["Abyss", "Ascent", "Haven", "Lotus", "Split", "Summit"]
 VALID_AGENTS = ["Astra", "Breach", "Brimstone", "Chamber", "Clove", "Cypher", "Deadlock", "Fade", "Gekko", "Harbor", 
           "Iso", "Jett", "KAY/O", "Killjoy", "Neon", "Omen", "Phoenix", "Raze", "Reyna", "Sage", "Skye", "Sova", 
           "Tejo", "Veto", "Viper", "Vyse", "Waylay", "Yoru"]
+
 # tested
 def handle_view_matches(matches):
     if not matches:
@@ -171,6 +172,19 @@ def handle_delete(matches):
 
     except ValueError:
         print("Invalid input. Please enter a valid Match ID.")
+
+
+#Assignment 2: search/sort
+
+# menu allowing users to search matches by any field, use get_matches from crud
+# obv maybe dont allow searching by - match_id, total_rounds, headshots, damage or other fields like that
+def handle_search(matches):
+    pass
+
+# menu allowing users to sort matches by any field, use sort_matches from crud
+def handle_sort(matches):
+    pass
+
 
 def main():
     matches = crud.load_matches()
