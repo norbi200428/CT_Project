@@ -108,12 +108,69 @@ def handle_create(matches):
 # UPDATE AN EXISTING RECORD 
 # Interactive CLI; ask for each field value, if not provided, data remains unchanged
 # might be a good idea to not allow the user to change the outcome of the match (results, rounds_won, rounds_lost, total_rounds) ?
+# tested
 def handle_update(matches):
-    pass
+    try:
+        match_id = int(input("\nEnter the Match ID to update: ").strip())
+        match = crud.get_match_by_id(matches, match_id)
+        if not match:
+            print(f"No match found with ID: {match_id}")
+            return
+
+        # comment out the ones that you dont want the user to be able to change
+        print(f"\nUpdating Match ID: {match_id}. Leave blank to keep current value.")
+        map_name = input(f"Map Name [{match['map_name']}]: ").strip().capitalize() or match['map_name']
+        agent = input(f"Agent/Character [{match['character']}]: ").strip().capitalize() or match['character']
+        # result = input(f"Result (Win/Lose) [{match['result']}]: ").strip().capitalize() or match['result']
+        # rounds_w = input(f"Rounds Won [{match['rounds_won']}]: ").strip()
+        # rounds_l = input(f"Rounds Lost [{match['rounds_lost']}]: ").strip()
+        kills = input(f"Kills [{match['kills']}]: ").strip()
+        deaths = input(f"Deaths [{match['deaths']}]: ").strip()
+        assists = input(f"Assists [{match['assists']}]: ").strip()
+        headshots = input(f"Headshots [{match['headshots']}]: ").strip()
+        damage = input(f"Total Damage [{match['damage']}]: ").strip()
+
+        # comment them out from here too 
+        updated_values = {
+            "map_name": map_name,
+            "character": agent,
+            # "result": result,
+            # "rounds_won": int(rounds_w) if rounds_w else match['rounds_won'],
+            # "rounds_lost": int(rounds_l) if rounds_l else match['rounds_lost'],
+            "kills": int(kills) if kills else match['kills'],
+            "deaths": int(deaths) if deaths else match['deaths'],
+            "assists": int(assists) if assists else match['assists'],
+            "headshots": int(headshots) if headshots else match['headshots'],
+            "damage": int(damage) if damage else match['damage'],
+        }
+
+        crud.update_match(matches, match_id, **updated_values)
+        print(f"\nMatch {match_id} updated successfully.")
+    except ValueError as e:
+        print(f"Validation Error: {e}")
 # DELETE A RECORD
 # would be nice to ask for a confirmation before delete
+# tested
 def handle_delete(matches):
-    pass
+    try:
+        match_id = int(input("\nEnter the Match ID to delete: ").strip())
+        match = crud.get_match_by_id(matches, match_id)
+        if not match:
+            print(f"No match found with ID: {match_id}")
+            return
+
+        confirm = input(f"Are you sure you want to delete Match ID {match_id}? (y/n): ").strip().lower()
+        if confirm == 'y':
+            success = crud.delete_match(matches, match_id)
+            if success:
+                print(f"Match {match_id} deleted successfully.")
+            else:
+                print(f"Failed to delete Match {match_id}.")
+        else:
+            print("Deletion canceled.")
+
+    except ValueError:
+        print("Invalid input. Please enter a valid Match ID.")
 
 def main():
     matches = crud.load_matches()

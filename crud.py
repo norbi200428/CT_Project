@@ -117,3 +117,30 @@ def add_match(matches, player_id, map_name, character, result, rounds_won, round
     matches.append(new_record)
     save_matches(matches)
     return new_record
+
+
+def delete_match(matches, match_id):
+    """Delete a match by its ID and persist changes."""
+    match_to_delete = get_match_by_id(matches, match_id)
+    if match_to_delete:
+        matches.remove(match_to_delete)
+        save_matches(matches)
+        return True
+    return False
+
+def update_match(matches, match_id, **kwargs):
+    """Update a match record by its ID and persist changes."""
+    match_to_update = get_match_by_id(matches, match_id)
+    if not match_to_update:
+        return False
+
+    for key, value in kwargs.items():
+        if key in match_to_update:
+            match_to_update[key] = value
+
+    # recalculate total rounds if rounds_won or rounds_lost are updated
+    if "rounds_won" in kwargs or "rounds_lost" in kwargs:
+        match_to_update["total_rounds"] = match_to_update["rounds_won"] + match_to_update["rounds_lost"]
+
+    save_matches(matches)
+    return True
