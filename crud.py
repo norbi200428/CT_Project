@@ -92,3 +92,28 @@ def get_player_stats(matches, player_id):
         "career_adr": total_damage / total_rounds if total_rounds > 0 else 0.0,
     }
 
+def add_match(matches, player_id, map_name, character, result, rounds_won, rounds_lost, kills, deaths, assists, headshots, damage):
+    """Create a new match record, append it, and persist to file."""
+    existing_ids = [m["match_id"] for m in matches]
+    next_id = max(existing_ids, default=0) + 1
+    total_rounds = rounds_won + rounds_lost
+
+    new_record = {
+        "match_id": next_id,
+        "player_id": player_id,
+        "map_name": map_name,
+        "character": character,
+        "result": result,
+        "rounds_won": rounds_won,
+        "rounds_lost": rounds_lost,
+        "total_rounds": total_rounds,
+        "kills": kills,
+        "deaths": deaths,
+        "assists": assists,
+        "headshots": headshots,
+        "damage": damage,
+    }
+
+    matches.append(new_record)
+    save_matches(matches)
+    return new_record

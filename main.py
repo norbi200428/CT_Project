@@ -1,5 +1,9 @@
 import crud
 
+VALID_MAPS = ["Abyss", "Ascent", "Haven", "Lotus", "Split", "Summit"]
+VALID_AGENTS = ["Astra", "Breach", "Brimstone", "Chamber", "Clove", "Cypher", "Deadlock", "Fade", "Gekko", "Harbor", 
+          "Iso", "Jett", "KAY/O", "Killjoy", "Neon", "Omen", "Phoenix", "Raze", "Reyna", "Sage", "Skye", "Sova", 
+          "Tejo", "Veto", "Viper", "Vyse", "Waylay", "Yoru"]
 # tested
 def handle_view_matches(matches):
     if not matches:
@@ -46,7 +50,60 @@ def handle_view_player(matches):
 
 # CREATE A NEW RECORD IN THE DATABASE
 def handle_create(matches):
-    pass
+    print("\n--- Log a New Match Record ---")
+    try:
+        player_id = int(input("Player ID (default 10001): ").strip() or "10001")
+        map_name = input("Map Name (e.g., Haven, Ascent): ").strip().capitalize()
+        agent = input("Agent/Character (e.g., Jett, Clove): ").strip().capitalize()
+
+        result = input("Result (Win/Lose): ").strip().capitalize()
+        if result not in ["Win", "Lose"]:
+            print("Defaulting result to 'Lose'.")
+            result = "Lose"
+
+        rounds_w = int(input("Rounds Won: "))
+        rounds_l = int(input("Rounds Lost: "))
+        kills = int(input("Kills: "))
+        deaths = int(input("Deaths: "))
+        assists = int(input("Assists: "))
+        headshots = int(input("Headshots: "))
+        damage = int(input("Total Damage: "))
+
+        # some extra checks for the input data
+        total_rounds = rounds_w + rounds_l
+        max_r, min_r = max(rounds_w, rounds_l), min(rounds_w, rounds_l)
+
+        if min(rounds_w, rounds_l, kills, deaths, assists, headshots, damage) < 0:
+            raise ValueError("Stats and rounds cannot be negative.")
+
+        if (result == "Win" and rounds_w <= rounds_l) or (result == "Lose" and rounds_l <= rounds_w):
+            raise ValueError(f"Score ({rounds_w}-{rounds_l}) does not match result '{result}'.")
+
+        is_regulation = (max_r == 13 and min_r <= 11)
+        is_overtime = (max_r >= 14 and min_r >= 12 and (max_r - min_r == 2))
+
+        if not (is_regulation or is_overtime):
+            raise ValueError(
+                f"Invalid score ({rounds_w}-{rounds_l}). Must be 13-X (max 11) or win by 2 in overtime (e.g., 14-12)."
+            )
+        
+        if kills > total_rounds * 5:
+            raise ValueError(f"Kills ({kills}) exceed maximum possible.")
+
+        if not map_name in VALID_MAPS:
+            raise ValueError(f"Invalid map name: {map_name}.")
+
+        if not agent in VALID_AGENTS:
+            raise ValueError(f"Invalid agent name: {agent}.")
+            
+        record = crud.add_match(
+            matches, player_id, map_name, agent, result,
+            rounds_w, rounds_l, kills, deaths, assists, headshots, damage
+        )
+        print(f"\nMatch {record['match_id']} created and saved successfully.")
+
+    except ValueError as e:
+        print(f"Validation Error: {e}")
 
 # UPDATE AN EXISTING RECORD 
 # Interactive CLI; ask for each field value, if not provided, data remains unchanged
@@ -91,7 +148,6 @@ def main():
             break
         else:
             print("Invalid option. Enter a number 1-6.")
-
 
 if __name__ == "__main__":
     main()
